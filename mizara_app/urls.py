@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DirectoryListAPIView, fileUploadView, UserListCreateAPIView,DownloadAPIView,DiskAPIView
+from .views import DirectoryListAPIView, fileUploadView, UserListCreateAPIView,DownloadAPIView,DiskAPIView,UnauthorisedDirectoryCreateAPIView
 from rest_framework.authtoken.views import ObtainAuthToken
 
 urlpatterns = [
@@ -10,4 +10,6 @@ urlpatterns = [
     path('api/directories/<path:directory>/', DirectoryListAPIView.as_view()),
     path('api/download/<path:file_path>/', DownloadAPIView.as_view()),
     path('api/disk/',DiskAPIView.as_view()),
+    path('api/UnauthorisedDirectory/', UnauthorisedDirectoryCreateAPIView.as_view),
+    path('api/UnauthorisedDirectory/<int:pk>/', UnauthorisedDirectoryCreateAPIView.as_view()),
 ]

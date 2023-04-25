@@ -1,6 +1,6 @@
 import mimetypes
 import os
-from .serializers import fileSerializer, UserSerializer
+from .serializers import UnauthorisedDirectorySerializer,fileSerializer, UserSerializer
 from .models import UnauthorisedDirectory
 from django.http import Http404,HttpResponse
 from rest_framework import status
@@ -126,3 +126,43 @@ class DiskAPIView(APIView):
                     'Percentage Used' : partition_info.percent
                 })
         return Response(part,status=status.HTTP_201_CREATED)
+
+class UnauthorisedDirectoryCreateAPIView(APIView):
+    def get(self, request):
+        try:
+            unauthorisedDirectory = UnauthorisedDirectory.objects.get(id=pk)
+        except UnauthorisedDirectory.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UnauthorisedDirectorySerializer(unauthorisedDirectory)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = UnauthorisedDirectorySerializer(data=request.data)
+        if serializer.is_valid():
+            if UnauthorisedDirectory.objects.filter(unauthorisedDirectoryname=serializer.validated_data["unauthorisedDirectoryname"]).exists():
+                    return Response({"response":"this unauthorisedDirectoryname is already used"}, status=status.HTTP_400_BAD_REQUEST)
+            serializer.save()
+            return Response({"response":"unauthorisedDirectory successfull added"}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        try:
+            unauthorisedDirectory = UnauthorisedDirectory.objects.get(pk=pk)
+        except UnauthorisedDirectory.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UnauthorisedDirectorySerializer(unauthorisedDirectory, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        try:
+            unauthorisedDirectory = UnauthorisedDirectory.objects.get(pk=pk)
+        except UnauthorisedDirectory.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        unauthorisedDirectory.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
