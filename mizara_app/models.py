@@ -5,14 +5,14 @@ class Fichier(models.Model):
     nom = models.CharField(max_length=255)
     taille = models.IntegerField()
     type_fichier = models.CharField(max_length=50)
-    emplacement = models.CharField(max_length=255)
+    fichier = models.FileField(upload_to='fichiers/')
+    proprietaire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='proprietaire')
 
 class Transfert(models.Model):
     expéditeur = models.ForeignKey(User, on_delete=models.CASCADE, related_name='envois')
     destinataire = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receptions')
     date = models.DateTimeField(auto_now_add=True)
-    nombre_fichiers = models.IntegerField()
-    taille_totale = models.IntegerField()
+    fichier = models.ForeignKey(Fichier, on_delete=models.CASCADE)
 
 class HistoriqueTransfert(models.Model):
     transfert = models.ForeignKey(Transfert, on_delete=models.CASCADE, related_name='historique')
