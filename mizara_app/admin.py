@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import *
 # Register your models here.
-admin.site.register(Fichier)
-admin.site.register(HistoriqueTransfert)
-admin.site.register(Transfert)
+admin.site.register(File)
+admin.site.register(TransferHistory)
+admin.site.register(Transfer)
