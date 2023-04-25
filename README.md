@@ -42,12 +42,13 @@
 
 - [x]   [Get] api/directories/<path:directory>/
 
-for filter the result , user api/directories/<path:directory>/?filter=name
+for filter the result , user api/directories/path:directory/?filter=name
         
 filter:
-      -   name
+-   name
       
-      -   ext
+-   ext
+
 
     ```
     {
