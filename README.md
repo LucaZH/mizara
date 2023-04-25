@@ -33,20 +33,20 @@
     ```json
     {
         "nom": "file_name",
-        "taille": os.path.getsize(file_path),
-        "type_fichier": mime.from_file(file_path),
+        "taille": "file_size",
+        "type_fichier": "file_type",
     }
     ```
 
     
 
 - [x]   [Get] api/directories/<path:directory>/
+
+for filter the result , user api/directories/<path:directory>/?filter=name
         
-        for filter the result , user api/directories/<path:directory>/?filter=name
-        
-        filter:
-            -   name
-            -   ext
+filter:
+      -   name
+      -   ext
 
     ```json
     {
