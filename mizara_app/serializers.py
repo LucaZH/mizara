@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Fichier
+from .models import File
 
 class UserSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255)
@@ -17,7 +17,7 @@ class UserSerializer(serializers.Serializer):
             password=validated_data['password']
         )
         return user
-class FichierSerializer(serializers.ModelSerializer):
+class fileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Fichier
+        model = File
         fields = '__all__'

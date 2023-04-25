@@ -1,15 +1,15 @@
 import mimetypes
 import os
+from .serializers import fileSerializer, UserSerializer
+from .models import UnauthorisedDirectory
 from django.http import Http404,HttpResponse
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
 from django.contrib.auth.models import User
-from .serializers import FichierSerializer, UserSerializer
-from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Fichier
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+import psutil
 
 class UserListCreateAPIView(APIView):
     def get(self, request,pk):
@@ -51,9 +51,9 @@ class UserListCreateAPIView(APIView):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class FichierUploadView(APIView):
+class fileUploadView(APIView):
     def post(self, request, format=None):
-        serializer = FichierSerializer(data=request.data)
+        serializer = fileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -64,13 +64,36 @@ class DirectoryListAPIView(APIView):
     def get(self, request, directory):
         directories = []
         files = []
-        for entry in os.scandir(directory):
-            if entry.is_dir():
-                directories.append(entry.name)
+        filter = request.GET.get('filter', '')
+        
+        try :
+            unauthorised_directories = [dir.directory for dir in UnauthorisedDirectory.objects.all()]
+            
+            for unauthorised_dir in unauthorised_directories:
+                if directory.startswith(unauthorised_dir):
+                    return Response({"message": "Access to this directory is not allowed."}, status=status.HTTP_403_FORBIDDEN)
+            
+            for entry in os.scandir(directory):
+                if entry.is_dir():
+                    
+                    directories.append(entry.name)
+                else:
+                    file_size = round(os.path.getsize(entry)/ 1024 / 1024,4)
+                    files.append({'file_name' : entry.name,
+                                  'file_size': f'{file_size} MB'
+                                  })
+            directories = sorted(directories)
+            if filter=="name":
+                files = sorted(files, key=lambda f: f['file_name'])
+            elif filter =="ext":
+                files = sorted(files, key=lambda f: (os.path.splitext(f['file_name'])[1], f['file_name']))
             else:
-                files.append(entry.name)
-        return Response({"directories": directories, "files": files})
+                files = sorted(files, key=lambda f: f['file_name'])
 
+        
+            return Response({"directories": directories, "files": files})
+        except:
+            return Response(f"No such files no directory {directory}", status=status.HTTP_400_BAD_REQUEST)
 class DownloadAPIView(APIView):
     # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticated]
@@ -84,3 +107,22 @@ class DownloadAPIView(APIView):
             response = HttpResponse(f.read(), content_type=mime_type)
             response['Content-Disposition'] = 'attachment; filename="{}"'.format(os.path.basename(file_path))
             return response
+class DiskAPIView(APIView):
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
+    def get(self, request):
+        partitions = psutil.disk_partitions(all=True)
+        part = []
+        for partition in partitions:
+            if partition.device.startswith('/dev'):
+                partition_info = psutil.disk_usage(partition.mountpoint)
+                part.append({
+                    'Device': partition.device,
+                    'Mountpoint': partition.mountpoint,
+                    'File systeme type': partition.fstype,
+                    'Total size' : f'{round(partition_info.total  / (1024.0 ** 3),2)} GB',
+                    'Used': f'{round(partition_info.used / (1024.0 ** 3),2)} GB',
+                    'Free': f'{round(partition_info.free / (1024.0 ** 3),2)} GB',
+                    'Percentage Used' : partition_info.percent
+                })
+        return Response(part,status=status.HTTP_201_CREATED)
