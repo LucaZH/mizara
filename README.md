@@ -30,15 +30,49 @@
 
 - [x] [Post] api/upload/
 
-- [x]   [Get] api/directories/<path:directory>
+    ```json
+    {
+        "nom": "file_name",
+        "taille": os.path.getsize(file_path),
+        "type_fichier": mime.from_file(file_path),
+    }
+    ```
+
+    
+
+- [x]   [Get] api/directories/<path:directory>/
+        
+        for filter the result , user api/directories/<path:directory>/?filter=name
+        
+        filter:
+            -   name
+            -   ext
 
     ```json
     {
         "directories": [],
-        "files": []
+        "files": [   
+            {
+            "file_name": "file_name",
+            "file_size": "0.0 MB"
+            },
+        ]
     }
     ```
 
 - [x] [Get] api/download/<path:file_path>/,
 
-  
+- [x] [Get] api/disk
+    ```json
+    [   
+        {
+            "Device": "/dev/sda5",
+            "Mountpoint": "/",
+            "File systeme type": "ext4",
+            "Total size": "113.99 GB",
+            "Used": "71.17 GB",
+            "Free": "36.99 GB",
+            "Percentage Used": 65.8
+        },
+    ]
+    ```
