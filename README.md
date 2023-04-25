@@ -46,9 +46,10 @@ for filter the result , user api/directories/<path:directory>/?filter=name
         
 filter:
       -   name
+      
       -   ext
 
-    ```json
+    ```
     {
         "directories": [],
         "files": [   
