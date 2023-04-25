@@ -32,9 +32,9 @@
 
     ```json
     {
-        "nom": "file_name",
-        "taille": "file_size",
-        "type_fichier": "file_type",
+        "name": "file_name",
+        "size": "file_size",
+        "file_type ": "file_type",
     }
     ```
 
@@ -50,7 +50,7 @@ filter:
 -   ext
 
 
-    ```
+    ```json
     {
         "directories": [],
         "files": [   
