@@ -82,6 +82,7 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+ALLOWED_HOSTS = ['*']
 
 
 # Password validation
