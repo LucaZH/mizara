@@ -2,7 +2,7 @@ import mimetypes
 import os
 from .serializers import UnauthorisedDirectorySerializer,fileSerializer, UserSerializer
 from .models import UnauthorisedDirectory
-from django.http import Http404,HttpResponse
+from django.http import FileResponse, Http404,HttpResponse
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -107,6 +107,16 @@ class DownloadAPIView(APIView):
             response = HttpResponse(f.read(), content_type=mime_type)
             response['Content-Disposition'] = 'attachment; filename="{}"'.format(os.path.basename(file_path))
             return response
+class FileStreamingView(APIView):
+    def get(self, request, file_path):
+        if not os.path.exists(file_path):
+            raise Http404
+        with open(file_path, 'rb') as file:
+            file_content = file.read()
+        content_type, encoding = mimetypes.guess_type(file_path)
+        response = HttpResponse(file_content, content_type=content_type)
+        response['Content-Disposition'] = 'inline; filename="{}"'.format(file_path.split('/')[-1])
+        return response
 class DiskAPIView(APIView):
     # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticated]
@@ -126,6 +136,8 @@ class DiskAPIView(APIView):
                     'Percentage Used' : partition_info.percent
                 })
         return Response(part,status=status.HTTP_201_CREATED)
+
+
 
 class UnauthorisedDirectoryCreateAPIView(APIView):
     def get(self, request):

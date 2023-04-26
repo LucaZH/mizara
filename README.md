@@ -28,7 +28,7 @@
 
 - [x] [Get] api/token/
 
-- [x] [Post] api/upload/
+- [x] [Post] api/upload/ (file path in a file content in )
 
     ```json
     {
@@ -63,6 +63,8 @@ filter:
     ```
 
 - [x] [Get] api/download/<path:file_path>/,
+
+- [x] [Get] api/streaming/<path:file_path>/,
 
 - [x] [Get] api/disk
     ```json
