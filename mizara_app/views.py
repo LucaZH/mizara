@@ -1,5 +1,6 @@
 import mimetypes,os,psutil
-from .serializers import SerializerUser, UnauthorisedDirectorySerializer,fileSerializer
+from django.shortcuts import get_object_or_404
+from .serializers import SerializerUser, TransferSerializer, UnauthorisedDirectorySerializer,fileSerializer
 from .models import UnauthorisedDirectory
 from django.http import Http404,HttpResponse
 from rest_framework.exceptions import ValidationError
@@ -10,7 +11,7 @@ from django.contrib.auth.models import User
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
-
+from .models import Transfer
 class UserListCreateAPIView(APIView):
     def post(self, request):
         userserializer = SerializerUser(data=request.data)
@@ -103,10 +104,14 @@ class DirectoryListAPIView(APIView):
 
 class DownloadAPIView(APIView):
 
-    # authentication_classes = [TokenAuthentication]
-    # permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         file_path = self.request.query_params.get('file_path')
+        user = request.user
+        user_instance = get_object_or_404(User, id=user.id)
+        transfer = Transfer.objects.create(downloader=user_instance, file_path=file_path)
         if not file_path or not os.path.exists(file_path):
             raise Http404
         mime_type, encoding = mimetypes.guess_type(file_path)
@@ -118,6 +123,9 @@ class DownloadAPIView(APIView):
             return response
 
 class FileStreamingView(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         file_path = self.request.query_params.get('file_path')
@@ -134,6 +142,7 @@ class DiskAPIView(APIView):
 
     # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticated]
+
     def get(self, request):
         partitions = psutil.disk_partitions(all=True)
         part = []
@@ -152,7 +161,7 @@ class DiskAPIView(APIView):
         return Response(part,status=status.HTTP_201_CREATED)
 
 class UnauthorisedDirectoryList(APIView):
-
+    
     def get(self, request):
         directories = UnauthorisedDirectory.objects.all()
         serializer = UnauthorisedDirectorySerializer(directories, many=True)
@@ -193,3 +202,20 @@ class UnauthorisedDirectoryDetail(APIView):
         directory = self.get_object(pk)
         directory.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class TransferList(APIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        Transfers = Transfer.objects.all()
+        serializer = TransferSerializer(Transfers, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = TransferSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
