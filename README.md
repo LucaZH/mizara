@@ -27,7 +27,7 @@
         }
     ```
 
-- [x] [Post] api/upload/ (file path in a file content in )
+- [x] [Post] api/upload/ 
 
     ```json
     {
