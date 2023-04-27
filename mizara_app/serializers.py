@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import File,UnauthorisedDirectory
+from .models import File, Transfer,UnauthorisedDirectory
 
 class SerializerUser(serializers.Serializer):
     username = serializers.CharField(max_length=100)
@@ -17,8 +17,14 @@ class fileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
         fields = '__all__'
+
 class UnauthorisedDirectorySerializer(serializers.ModelSerializer):
     class Meta:
         model = UnauthorisedDirectory
         fields = ['directory_path', 'created_at']
         read_only_fields = ['created_at']
+
+class TransferSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transfer
+        fields = '__all__'
