@@ -8,9 +8,9 @@ class File(models.Model):
     file = models.FileField(upload_to='files/')
 
 class Transfer(models.Model):
-    downloader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_files')
+    downloader = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateTimeField(auto_now_add=True)
-    file_path = models.ForeignKey(File, on_delete=models.CASCADE)
+    file_path = models.CharField(max_length=500)
 
 
 class UnauthorisedDirectory(models.Model):
