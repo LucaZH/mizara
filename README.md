@@ -70,9 +70,13 @@
 
 - [x] [Get] api/download/
 
+    `header : "token": "ed53d1211ee261bbb1209530c69b5f4c19232c33" `
+
     `Parameters : file_path`
 
 - [x] [Get] api/streaming/
+
+    `header : "token": "ed53d1211ee261bbb1209530c69b5f4c19232c33" `
 
     `Parameters : file_path`
 
@@ -91,4 +95,21 @@
             "Percentage Used": 65.8
         },
     ]
+    ```
+
+- [x] [Get] api/transfer/
+
+    `header : "token": "ed53d1211ee261bbb1209530c69b5f4c19232c33" `
+
+    Response :
+
+    ```json
+        [
+            {
+                "id": 1,
+                "date": "2023-04-27T17:10:12.362897Z",
+                "file_path": "/home/rimuru/test.sh",
+                "downloader": 1 //User.id
+            },
+        ]
     ```
