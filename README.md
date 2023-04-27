@@ -3,30 +3,29 @@
 
   ```json
   {
-      "first_name": "",
-      "last_name": "",
       "username": "",
-      "email": ""
+      "email": "",
+      "password":"",
   }
   ```
-
-  
-
 
 - [x] [Get] [Put] [Delete] api/users/<int:pk>/
 
     ```json
     {
-        "first_name": "",
-        "last_name": "",
         "username": "",
         "email": ""
     }
     ```
 
-    
+- [x] [Post] api/token/
 
-- [x] [Get] api/token/
+    ```json
+        {
+            "username": "",
+            "password": ""
+        }
+    ```
 
 - [x] [Post] api/upload/ (file path in a file content in )
 
@@ -40,16 +39,23 @@
 
     
 
-- [x]   [Get] api/directories/<path:directory>/
+- [x]   [Get] api/directories/
 
-for filter the result , user api/directories/path:directory/?filter=name
+    Parameters : 
+
+    -   dir 
+    -   filter
+
+    Filter:
+
+    -   name
         
-filter:
--   name
-      
--   ext
+    -   ext
 
-
+    Example:
+        api/directories/?dir=/home/rimuru/&?filter=ext
+    
+    Response :
     ```json
     {
         "directories": [],
@@ -62,11 +68,17 @@ filter:
     }
     ```
 
-- [x] [Get] api/download/<path:file_path>/,
+- [x] [Get] api/download/
 
-- [x] [Get] api/streaming/<path:file_path>/,
+    `Parameters : file_path`
+
+- [x] [Get] api/streaming/
+
+    `Parameters : file_path`
 
 - [x] [Get] api/disk
+
+    Response :
     ```json
     [   
         {

@@ -14,7 +14,6 @@ class Transfer(models.Model):
 
 
 class UnauthorisedDirectory(models.Model):
-    directory = models.CharField(max_length=255)
-    def __str__(self):
-        return self.directory
+    directory_path = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
