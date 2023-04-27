@@ -106,10 +106,10 @@
     ```json
         [
             {
-                "id": 1,
-                "date": "2023-04-27T17:10:12.362897Z",
-                "file_path": "/home/rimuru/test.sh",
-                "downloader": 1 //User.id
+                "id": "id",
+                "date": "date_now",
+                "file_path": "file_path",
+                "downloader": "user_id"
             },
         ]
     ```
