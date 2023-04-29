@@ -113,3 +113,13 @@
             },
         ]
     ```
+- [x] [Get] api/sysinfo/
+
+    ```json
+        {
+        "OS": "Linux-5.10.0-21-amd64-x86_64-with-glibc2.31",
+        "Processor": "",
+        "Pc-name": "dev",
+        "machine": "x86_64"
+        }
+    ```

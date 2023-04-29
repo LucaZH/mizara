@@ -1,4 +1,4 @@
-import mimetypes,os,psutil
+import mimetypes,os,psutil,platform
 from django.shortcuts import get_object_or_404
 from .serializers import SerializerUser, TransferSerializer, UnauthorisedDirectorySerializer,fileSerializer
 from .models import UnauthorisedDirectory
@@ -12,6 +12,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 from .models import Transfer
+
 class UserListCreateAPIView(APIView):
     def post(self, request):
         userserializer = SerializerUser(data=request.data)
@@ -23,14 +24,15 @@ class UserListCreateAPIView(APIView):
             return Response({"response": "user successfull added"}, status=status.HTTP_201_CREATED)
 
         return Response(userserializer.errors, status=status.HTTP_403_FORBIDDEN)
-    def get(self, request,pk):
-        try:
-            user = User.objects.get(id=pk)
-        except User.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-
-        serializer = SerializerUser(user)
-        return Response(serializer.data)
+    
+    def get(self, request):
+        pk=request.user.id
+        user = User.objects.filter(id=pk)
+        if user.exists():
+            serializer = SerializerUser(user)
+            return Response(serializer.data)   
+        
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     def put(self, request, pk):
         try:
@@ -64,13 +66,47 @@ class fileUploadView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class FilesbyExtension(APIView):
+    
+    def get(self,request):
+        file=[]
+        type=["pictures","videos","other","music","documents"]
+        paramtype= self.request.query_params.get('type')
+        directory = self.request.query_params.get('dir')
+        try :
+            unauthorised_directories = [dir.directory_path for dir in UnauthorisedDirectory.objects.all()]
+            
+            for unauthorised_dir in unauthorised_directories:
+                if directory.startswith(unauthorised_dir):
+                    return Response({"message": "Access to this directory is not allowed."}, status=status.HTTP_403_FORBIDDEN)
+            
+            for entry in os.scandir(directory):
+                if entry.is_dir():
+                    pass
+                else:
+                    file_size = round(os.path.getsize(entry)/ 1024 / 1024,4)
+                    files.append({'file_name' : entry.name,
+                                  'file_size': f'{file_size} MB'
+                                  })
+                    
+            if filter=="name":
+                files = sorted(files, key=lambda f: f['file_name'])
+            elif filter =="ext":
+                files = sorted(files, key=lambda f: (os.path.splitext(f['file_name'])[1], f['file_name']))
+            else:
+                files = sorted(files, key=lambda f: f['file_name'])
+
+            return Response({"files": files})
+        except:
+            return Response(f"No such files no directory {directory}", status=status.HTTP_400_BAD_REQUEST)
+        
 class DirectoryListAPIView(APIView):
 
     # authentication_classes = [TokenAuthentication]
     # permission_classes = [IsAuthenticated]
+    
     def get(self, request):
-        directories = []
-        files = []
+        directories,files = [],[]
         directory = self.request.query_params.get('dir')
         filter = request.GET.get('filter', '')
         
@@ -124,8 +160,8 @@ class DownloadAPIView(APIView):
 
 class FileStreamingView(APIView):
 
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated]
 
     def get(self, request):
         file_path = self.request.query_params.get('file_path')
@@ -179,12 +215,6 @@ class UnauthorisedDirectoryList(APIView):
 
 class UnauthorisedDirectoryDetail(APIView):
 
-    def get_object(self, pk):
-        try:
-            return UnauthorisedDirectory.objects.get(pk=pk)
-        except UnauthorisedDirectory.DoesNotExist:
-            raise Http404
-
     def get(self, request, pk):
         directory = self.get_object(pk)
         serializer = UnauthorisedDirectorySerializer(directory)
@@ -219,3 +249,15 @@ class TransferList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class Sysinfo(APIView):
+
+    def get(self,request):
+        sysinfo={
+            'OS': platform.platform(),
+            'Processor': platform.processor(),
+            'Pc-name': platform.node(),
+            'machine': platform.machine(),
+            # 'System_alias': platform.system_alias(version=platform.version,release=platform.release(),system=platform.system())
+        }
+        return Response(sysinfo,status=status.HTTP_201_CREATED)
